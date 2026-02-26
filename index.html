@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>HM Desk Business - Viewer Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #7b2cff; --primary-light: #f3edff; --success: #22c55e;
+            --danger: #ef4444; --text: #1a1a2e; --text-light: #64748b;
+            --bg: #f8f9fe; --card: #ffffff; --radius: 16px;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding-bottom: 90px; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
+        
+        header { background: var(--card); padding: 20px; text-align: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        header h1 { margin: 0; font-size: 18px; font-weight: 800; color: var(--primary); }
+
+        .view-section { display: none; padding: 15px; max-width: 800px; margin: 0 auto; }
+        .view-section.active { display: block; }
+
+        /* Card Detalhado */
+        .card-registro { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .row-detalhe { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; font-size: 12px; margin-top: 10px; }
+        .item-info b { display: block; color: var(--text-light); font-size: 9px; text-transform: uppercase; margin-bottom: 2px; }
+        .status-badge { padding: 4px 12px; border-radius: 6px; font-weight: 800; font-size: 11px; text-align: center; color: white; border: none; }
+        
+        /* Filtro */
+        .filter-box { background: #fff; padding: 15px; border-radius: var(--radius); margin-bottom: 20px; box-shadow: 0 4px 12px rgba(123,44,255,0.1); }
+        .filter-nav { display: flex; gap: 5px; margin-bottom: 10px; }
+        .btn-opt { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #eee; background: #fdfdfd; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .btn-opt.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-clear-opt { background: #fff1f1; color: var(--danger); border-color: #ffdada; }
+
+        /* Calendário Miniatura */
+        .cal-container { background: white; border: 1px solid #eee; border-radius: 12px; padding: 10px; }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 800; font-size: 14px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 11px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .cal-day.sel { background: var(--primary) !important; color: white !important; }
+        .cal-day.rng { background: var(--primary-light); color: var(--primary); }
+
+        /* Formulário */
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 10px; font-weight: 800; color: var(--text-light); margin-bottom: 4px; text-transform: uppercase; }
+        input { width: 100%; height: 48px; border-radius: 10px; border: 1px solid #ddd; padding: 0 12px; font-family: inherit; font-size: 14px; }
+        .btn-p { width: 100%; height: 50px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+
+        /* Tab Bar */
+        .tabs { position: fixed; bottom: 0; width: 100%; background: white; height: 70px; display: flex; border-top: 1px solid #eee; z-index: 1000; }
+        .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--text-light); }
+        .tab.active { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<header><h1>HM DESK BUSINESS</h1></header>
+
+<section id="aba-lançar" class="view-section active">
+    <div style="background:#fff9db; padding:10px; border-radius:8px; font-size:11px; margin-bottom:15px; color:#856404; text-align:center;">
+        ⚠️ <b>MODO VISUALIZADOR:</b> Apenas administradores podem salvar novos registros.
+    </div>
+    
+    <div class="input-group"><label>Veículo</label><input type="text" id="in-carro" placeholder="Modelo do carro"></div>
+    <div style="display:flex; gap:10px">
+        <div class="input-group" style="flex:1"><label>Placa</label><input type="text" id="in-placa" placeholder="ABC-1234"></div>
+        <div class="input-group" style="flex:1"><label>Fornecedor</label><input type="text" id="in-forn" placeholder="Nome do fornecedor"></div>
+    </div>
+    <div class="input-group"><label>Cliente</label><input type="text" id="in-cli" placeholder="Nome do cliente"></div>
+    <div style="display:flex; gap:10px">
+        <div class="input-group" style="flex:1"><label>Data Entrada</label><input type="date" id="in-ent"></div>
+        <div class="input-group" style="flex:1"><label>Data Saída</label><input type="date" id="in-sai"></div>
+    </div>
+    <div style="display:flex; gap:10px">
+        <div class="input-group" style="flex:1"><label>Vlr. Compra (R$)</label><input type="number" id="in-comp" placeholder="0,00"></div>
+        <div class="input-group" style="flex:1"><label>Vlr. Venda (R$)</label><input type="number" id="in-vend" placeholder="0,00"></div>
+    </div>
+    <button class="btn-p" onclick="adminMsg()">Salvar Registro</button>
+</section>
+
+<section id="aba-registros" class="view-section">
+    <div style="background:var(--primary); color:white; padding:15px; border-radius:12px; text-align:center; margin-bottom:15px">
+        <small>Margem Total Filtrada</small>
+        <h2 id="resumo-margem" style="margin:0">R$ 0,00</h2>
+    </div>
+
+    <div class="filter-box">
+        <div class="filter-nav">
+            <button class="btn-opt active" id="opt-dia" onclick="mudarModo('dia')">DIA</button>
+            <button class="btn-opt" id="opt-mes" onclick="mudarModo('mes')">MÊS</button>
+            <button class="btn-opt" id="opt-per" onclick="mudarModo('per')">PERÍODO</button>
+            <button class="btn-opt btn-clear-opt" onclick="limparFiltros()">LIMPAR</button>
+        </div>
+        
+        <div class="cal-container">
+            <div class="cal-header">
+                <button onclick="mudarMes(-1)" style="border:none;background:none">◀</button>
+                <span id="cal-titulo">...</span>
+                <button onclick="mudarMes(1)" style="border:none;background:none">▶</button>
+            </div>
+            <div class="cal-grid" id="cal-grade"></div>
+        </div>
+
+        <select id="f-status" onchange="renderizar()" style="width:100%; margin-top:10px; height:35px; border-radius:8px; border:1px solid #eee; font-weight:700; font-size:12px">
+            <option value="todos">Todos os Status</option>
+            <option value="pago">Somente Pagos</option>
+            <option value="pendente">Pendentes</option>
+        </select>
+    </div>
+
+    <div id="lista-cards"></div>
+    <button onclick="importarJSON()" class="btn-p" style="background:#e2e8f0; color:#1a1a2e; margin-top:20px">📥 IMPORTAR BACKUP JSON</button>
+</section>
+
+<nav class="tabs">
+    <div class="tab active" onclick="nav('lançar', this)"><span>➕</span>LANÇAR</div>
+    <div class="tab" onclick="nav('registros', this)"><span>📋</span>REGISTROS</div>
+</nav>
+
+<script>
+let dados = JSON.parse(localStorage.getItem("hm_pro_db") || "[]");
+let modoFiltro = 'dia'; 
+let dataRef = new Date();
+let selInicio = null; 
+let selFim = null;
+
+function adminMsg() {
+    alert("❌ Ação Não Autorizada: Apenas o Administrador pode salvar registros.");
+    document.querySelectorAll('#aba-lançar input').forEach(i => i.value = "");
+}
+
+function nav(aba, el) {
+    document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('aba-' + aba).classList.add('active');
+    el.classList.add('active');
+    if(aba === 'registros') { desenharCalendario(); renderizar(); }
+}
+
+function mudarModo(m) {
+    modoFiltro = m;
+    document.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
+    if(document.getElementById('opt-' + m)) document.getElementById('opt-' + m).classList.add('active');
+    
+    if(m === 'mes') {
+        selInicio = `${dataRef.getFullYear()}-${String(dataRef.getMonth()+1).padStart(2,'0')}-01`;
+        selFim = null;
+    } else {
+        selInicio = null; selFim = null;
+    }
+    desenharCalendario(); 
+    renderizar();
+}
+
+function limparFiltros() {
+    selInicio = null; selFim = null;
+    modoFiltro = 'dia';
+    document.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
+    document.getElementById('opt-dia').classList.add('active');
+    document.getElementById('f-status').value = 'todos';
+    desenharCalendario();
+    renderizar();
+}
+
+function desenharCalendario() {
+    const grade = document.getElementById('cal-grade');
+    grade.innerHTML = "";
+    const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    document.getElementById('cal-titulo').innerText = meses[dataRef.getMonth()] + " " + dataRef.getFullYear();
+
+    const primeiroDia = new Date(dataRef.getFullYear(), dataRef.getMonth(), 1).getDay();
+    const ultimoDia = new Date(dataRef.getFullYear(), dataRef.getMonth() + 1, 0).getDate();
+
+    for(let i=0; i<primeiroDia; i++) grade.appendChild(document.createElement('div'));
+
+    for(let i=1; i<=ultimoDia; i++) {
+        const d = document.createElement('div');
+        d.className = 'cal-day';
+        const iso = `${dataRef.getFullYear()}-${String(dataRef.getMonth()+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+        d.innerText = i;
+
+        if(modoFiltro === 'mes' && selInicio) {
+            if(iso.substring(0,7) === selInicio.substring(0,7)) d.classList.add('rng');
+        } else {
+            if(iso === selInicio || iso === selFim) d.classList.add('sel');
+            if(selInicio && selFim && iso > selInicio && iso < selFim) d.classList.add('rng');
+        }
+
+        d.onclick = () => {
+            if(modoFiltro === 'dia') { 
+                selInicio = iso; 
+            } else if(modoFiltro === 'per') {
+                if(!selInicio || (selInicio && selFim)) { 
+                    selInicio = iso; selFim = null; 
+                } else {
+                    if(iso < selInicio) { selFim = selInicio; selInicio = iso; }
+                    else { selFim = iso; }
+                }
+            }
+            desenharCalendario(); renderizar();
+        };
+        grade.appendChild(d);
+    }
+}
+
+function renderizar() {
+    const lista = document.getElementById('lista-cards');
+    lista.innerHTML = "";
+    const statusFiltro = document.getElementById('f-status').value;
+
+    const filtrados = dados.filter(r => {
+        const isP = (r.pago === true || r.pago === "true" || r.pago === "Pago");
+        if(statusFiltro === 'pago' && !isP) return false;
+        if(statusFiltro === 'pendente' && isP) return false;
+
+        if(!selInicio) return true;
+        const dR = r.dataEntrada;
+        if(modoFiltro === 'dia') return dR === selInicio;
+        if(modoFiltro === 'mes' && selInicio) return dR.substring(0,7) === selInicio.substring(0,7);
+        if(modoFiltro === 'per') {
+            if(selInicio && selFim) return dR >= selInicio && dR <= selFim;
+            return dR === selInicio;
+        }
+        return true;
+    }).reverse();
+
+    filtrados.forEach(r => {
+        const isP = (r.pago === true || r.pago === "true" || r.pago === "Pago");
+        const card = document.createElement('div');
+        card.className = 'card-registro';
+        card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center">
+                <b style="color:var(--primary); font-size:14px">${r.carro || 'VEÍCULO'}</b>
+                <div class="status-badge" style="background:${isP?'var(--success)':'var(--danger)'}">${isP?'PAGO':'PENDENTE'}</div>
+            </div>
+            <div class="row-detalhe">
+                <div class="item-info"><b>Entrada</b>${fmt(r.dataEntrada)}</div>
+                <div class="item-info"><b>Placa</b>${r.placa || '-'}</div>
+                <div class="item-info"><b>Forn.</b>${r.fornecedor || '-'}</div>
+                <div class="item-info"><b>Cliente</b>${r.cliente || '-'}</div>
+            </div>
+            <div class="row-detalhe" style="background:#fcfcfc; padding:8px; border-radius:8px; margin-top:12px">
+                <div class="item-info"><b>Compra</b>R$ ${Number(r.valorCompra||0).toLocaleString()}</div>
+                <div class="item-info"><b>Saída</b>${fmt(r.dataSaida)}</div>
+                <div class="item-info"><b>Venda</b>R$ ${Number(r.valorVenda||0).toLocaleString()}</div>
+                <div class="item-info" style="color:var(--success)"><b>Margem</b>R$ ${Number(r.margem||0).toLocaleString()}</div>
+            </div>
+        `;
+        lista.appendChild(card);
+    });
+
+    const total = filtrados.reduce((acc, r) => acc + Number(r.margem || 0), 0);
+    document.getElementById('resumo-margem').innerText = "R$ " + total.toLocaleString('pt-BR', {minimumFractionDigits:2});
+}
+
+function fmt(d) { return d ? d.split('-').reverse().join('/') : '-'; }
+function mudarMes(v) { 
+    dataRef.setMonth(dataRef.getMonth() + v); 
+    if(modoFiltro === 'mes') selInicio = `${dataRef.getFullYear()}-${String(dataRef.getMonth()+1).padStart(2,'0')}-01`;
+    desenharCalendario(); renderizar(); 
+}
+
+function importarJSON() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = e => {
+        const reader = new FileReader();
+        reader.onload = f => {
+            try {
+                dados = JSON.parse(f.target.result);
+                localStorage.setItem("hm_pro_db", JSON.stringify(dados));
+                alert("✅ Backup importado com sucesso!");
+                renderizar();
+            } catch(e) { alert("❌ Arquivo JSON inválido."); }
+        };
+        reader.readAsText(e.target.files[0]);
+    };
+    input.click();
+}
+
+desenharCalendario();
+renderizar();
+</script>
+</body>
+</html>
