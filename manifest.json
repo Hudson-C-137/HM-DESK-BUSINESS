@@ -1,0 +1,16 @@
+{
+  "name": "HM Desk Business",
+  "short_name": "HMDesk",
+  "description": "Visualizador HM Desk Business Pro",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f8f9fe",
+  "theme_color": "#7b2cff",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3001/3001764.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
