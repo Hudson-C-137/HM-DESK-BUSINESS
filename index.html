@@ -4,6 +4,27 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>HM Desk Business - Viewer Pro</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HM Desk">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3001/3001764.png">
+    <meta name="theme-color" content="#7b2cff">
+    
+    <script>
+        // SERVICE WORKER PARA HABILITAR INSTALAÇÃO NO ANDROID E PC
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = "self.addEventListener('fetch', function(event) { event.respondWith(fetch(event.request)); });";
+                const blob = new Blob([swCode], { type: 'text/javascript' });
+                const url = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(url)
+                    .then(reg => console.log('PWA: Pronto para instalar'))
+                    .catch(err => console.log('PWA: Erro', err));
+            });
+        }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
